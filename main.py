@@ -9,6 +9,8 @@ window.title("Bacteria Culture-tron")
 # Setup our first label
 cultureid_label = tk.Label(window, text="Culture ID: ")
 
+# Setup another label
+
 # Stick that label into the grid!
 cultureid_label.grid(row=1, column=1)
 
