@@ -9,17 +9,37 @@ window = tk.Tk()
 # Set the title of our window
 window.title("Bacteria Culture-tron")
 
-# Simple function to remove the selected entry from the listbox
+# This function waits for the exit button to be pressed to end the program
+def exit_button_press():
+    exit()
+
+# This function is used to read data from a file and return a list of all the content in that file
+def get_file_data(file):
+    data = []
+    filename = file + ".dat"
+    file = open(filename, "r")
+    contents = file.readlines()
+
+    for line in contents:
+        data.append(line)
+
+    return data
+
+
+# Function to remove the selected entry from the listbox when the remove button is pressed
 def remove_button_press():
 
     # Command to delete the currently selected item
     delete_entry = listbox.delete((listbox.curselection()))
 
+    # Remove graph image if it's there
+    img_label["image"] = ""
+    img_label.image = ""
+
     # And let's disable some of the buttons since we know the currently selected item is gone now
     remove_button["state"] = "disable"
     linear_button["state"] = "disable"
     save_button["state"] = "disable"
-
 
 
 # This function looks a little intense, it could probably be improved a little bit...
@@ -200,14 +220,15 @@ cultureid_entry = tk.Entry(frame_inputs, textvariable=cultureid_input)
 
 # Here's the setup for our dropdown...
 # First we create a list of options for the dropdown menu.
-bacteria_list = ["Coccus", "Bacillus", "Spirillum", "Rickettsia", "Mycoplasma"]
+bacteria_list = get_file_data("bacteria")
+
 bacteria_label = tk.Label(frame_inputs, text="Bacteria Type: ")
 bacteria_dropdown = tk.OptionMenu(frame_inputs, bacteria_selection, *bacteria_list)
 # Set the default option to the first element in the list
 bacteria_selection.set(bacteria_list[0])
 
 # And here's the setup for our medicine dropdown
-medicine_list = ["Control", "Formula-FD102", "Formula-FD201", "Formula-FD202", "Formula-FD505"]
+medicine_list = get_file_data("medicine")
 medicine_label = tk.Label(frame_inputs, text="Medicine: ")
 medicine_dropdown = tk.OptionMenu(frame_inputs, medicine_selection, *medicine_list)
 medicine_selection.set(medicine_list[0])
@@ -227,6 +248,7 @@ listbox.bind('<<ListboxSelect>>',list_item_selected)
 # And finally we'll setup our buttons into a button frame.
 confirm_button = tk.Button(frame_input_buttons, text="Confirm", command=confirm_button_press)
 clear_button = tk.Button(frame_input_buttons, text="Clear Inputs", command=clear_inputs)
+exit_button = tk.Button(frame_input_buttons, text="Exit", command=exit_button_press)
 
 save_button = tk.Button(frame_output_buttons, text="Save", command=save_button_press, state="disable")
 linear_button = tk.Button(frame_output_buttons, text="Linear Projection", command=linear_button_press, state="disable")
@@ -258,6 +280,7 @@ listbox.grid(row=0, column=0, padx=6, pady=6, sticky="NSEW")
 
 confirm_button.grid(row=0, column=0, padx=6, pady=6)
 clear_button.grid(row=0, column=1, padx=6, pady=6)
+exit_button.grid(row=0, column=2, padx=6, pady=6)
 
 save_button.grid(row=0, column=0, padx=6, pady=6)
 linear_button.grid(row=0, column=1, padx=6, pady=6)
