@@ -1,3 +1,8 @@
+# Bacteria Culture analysis program written in Python and tkinter.
+# This program has been developed by Team 2-3 during the December 2020 Sprint
+# week for the Keyin Software Development program.
+
+
 import tkinter as tk
 import tkinter.simpledialog
 import matplotlib.pyplot as plt
