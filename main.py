@@ -1,10 +1,13 @@
 # Bacteria Culture analysis program written in Python and tkinter.
 # This program has been developed by Team 2-3 during the December 2020 Sprint
 # week for the Keyin Software Development program.
+# The program takes the the user's readings which can be saved to a data file
+# and also has the ability to plot graphs based on the data provided.
 
 
 import tkinter as tk
 import tkinter.simpledialog
+from tkinter import messagebox
 import matplotlib.pyplot as plt
 from PIL import Image, ImageTk
 
@@ -14,12 +17,19 @@ window = tk.Tk()
 # Set the title of our window
 window.title("Bacteria Culture-tron")
 
-# This function waits for the exit button to be pressed to end the program
 def exit_button_press():
+    '''
+    Description: Exits the program and closes the window
+    :return: Nothing
+    '''
     exit()
 
-# This function is used to read data from a file and return a list of all the content in that file
 def get_file_data(file):
+    '''
+    Description: Reads all data in a file and saves each line into a list
+    :param file: filename
+    :return: list of file contents
+    '''
     data = []
     filename = file + ".dat"
     file = open(filename, "r")
@@ -31,8 +41,11 @@ def get_file_data(file):
     return data
 
 
-# Function to remove the selected entry from the listbox when the remove button is pressed
 def remove_button_press():
+    '''
+    Description: Removes the currently selected entry from the listbox
+    :return: Nothing
+    '''
 
     # Command to delete the currently selected item
     delete_entry = listbox.delete((listbox.curselection()))
@@ -47,9 +60,12 @@ def remove_button_press():
     save_button["state"] = "disable"
 
 
-# This function looks a little intense, it could probably be improved a little bit...
-# But it's meant to fill in all the fields when you click a data-line that's been added to a listbox.
 def list_item_selected(msg):
+    '''
+    Description: Fill all fields with selected data when user clicks on an entry in the listbox
+    :param msg: tkinter event
+    :return: Nothing
+    '''
 
     # If an item has been selected in the listbox, we should also enable the linear button and delete buttons
     linear_button["state"] = "normal"
@@ -87,10 +103,13 @@ def list_item_selected(msg):
 
 
 
-# This function will generate a linear graph when button is pressed.
-# It asks the user for a start value and end value.
-# It then calculates the points by using y = a*x+b based on our evening and morning readings.
 def linear_button_press():
+    '''
+    Description: Plot a linear graph based on the data from the currently selected entry in the listbox.
+    After plotting the graph, it will then display it in the lower frame of our window.
+    :return: Nothing
+    '''
+
     # Setup empty lists for holding our x and y plotting data
     x_points = []
     y_points = []
@@ -135,8 +154,11 @@ def linear_button_press():
     img_label.image = photo
 
 
-# Just a little function to clear all inputs that we can use anytime we need it.
 def clear_inputs():
+    '''
+    Description: Clears all user input fields
+    :return: Nothing
+    '''
     cultureid_input.set("")
     bacteria_selection.set(bacteria_list[0])
     medicine_selection.set(medicine_list[0])
@@ -144,38 +166,74 @@ def clear_inputs():
     evening_input.set("")
 
 
-# This function will trigger each time the confirm button is pressed.
-# All information entered by user will be added to the listbox.
 def confirm_button_press():
-    # Save the user inputs into variables so they're easier to play with.
-    culture_id = cultureid_input.get()
-    bacteria_type = bacteria_selection.get()
-    medicine_type = medicine_selection.get()
+    '''
+    Description: Takes all user input data then calculates the rate of change from the user's values.
+    It then combines the data into a single-line string which is then added to the listbox.
+    :return: Nothing
+    '''
 
-    # We have to make sure these values are floats so we can do math things.
-    morning_reading = float(morning_input.get())
-    evening_reading = float(evening_input.get())
+    # Each valid input will increment the validate_check counter,
+    # if that reaches 3 we're okay to process the confirm button.
+    validate_check = 0
 
-    # Calculate the rate of change in the readings, for science.
-    rate_change = (evening_reading / morning_reading) - 1
+    # Validate each input that should be an int or float.
+    # Show an error if it's not valid.
+    try:
+        culture_id = int(cultureid_input.get())
+    except:
+        messagebox.showerror("Error", "Please enter a valid number for Culture ID")
+        cultureid_input.set("")
+    else:
+        validate_check+=1
 
-    # Create a string that contains all the above values
-    data_string = culture_id + ":" + bacteria_type + ":" + medicine_type + ":" + str(morning_reading) + ":" + str(
+    try:
+        morning_reading = float(morning_input.get())
+    except:
+        messagebox.showerror("Error", "Please enter a valid number for 6AM reading")
+        morning_input.set("")
+    else:
+        validate_check+=1
+
+    try:
+        evening_reading = float(evening_input.get())
+    except:
+        messagebox.showerror("Error", "Please enter a valid number for 6PM reading")
+        evening_input.set("")
+    else:
+        validate_check+=1
+
+    # Finish processing the confirm button if our validation checks out.
+    if validate_check >= 3:
+
+        # Get the values from our dropdowns
+        bacteria_type = bacteria_selection.get()
+        medicine_type = medicine_selection.get()
+
+
+        # Calculate the rate of change in the readings, for science.
+        rate_change = (evening_reading / morning_reading) - 1
+
+        # Create a string that contains all the above values
+        data_string = str(culture_id) + ":" + str(bacteria_type) + ":" + str(medicine_type) + ":" + str(morning_reading) + ":" + str(
         evening_reading) + ":" + str(rate_change)
 
-    # Now let's send that big string over to your list box
-    listbox.insert(0, data_string)
+        # Now let's send that big string over to your list box
+        listbox.insert(0, data_string)
 
-    # And clear out all the values to reset the inputs
-    clear_inputs()
+        # And clear out all the values to reset the inputs
+        clear_inputs()
 
-    # Make sure we enable the save button now that we have data added into the listbox
-    save_button["state"] = "normal"
+        # Make sure we enable the save button now that we have data added into the listbox
+        save_button["state"] = "normal"
 
 
-# This function will trigger when the save button is pressed.
-# All data inside the listbox will be saved into a file.
 def save_button_press():
+    '''
+    Description: Saves all data contained in the list box to a file.
+    The user will provide the filename from a simpledialog window.
+    :return: Nothing
+    '''
 
     # Save the contents of the listbox into our own list
     list_contents = listbox.get(0,tk.END)
